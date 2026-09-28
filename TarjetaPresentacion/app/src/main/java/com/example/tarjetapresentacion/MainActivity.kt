@@ -114,7 +114,7 @@ fun TarjetaPresentacion() {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun TarjetaPreview() {
     TarjetaPresentacionTheme {
         TarjetaPresentacion()
     }
