@@ -39,11 +39,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            // Aplicamos el tema de colores del proyecto a todo lo de dentro
             TarjetaPresentacionTheme {
+                // Surface = el "lienzo" de fondo que ocupa toda la pantalla
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // Aquí llamamos a NUESTRA función, la que dibuja la tarjeta
                     TarjetaPresentacion()
                 }
             }
@@ -55,14 +58,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TarjetaPresentacion() {
+    //LocalContext: asi un Composable "pide prestado" el contexto de Android. Lo necesitamos para poder abrir el navegador desde el botón
     val context = LocalContext.current
-
+    // COLUMN: apila los elementos de arriba a abajo (como un flexbox vertical)
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            .fillMaxSize() // ocupa toda la pantalla
+            .padding(16.dp), // margen para que nada toque los bordes
+        horizontalAlignment = Alignment.CenterHorizontally, // centra en el eje X
+        verticalArrangement = Arrangement.Center // centra en el eje Y
     ) {
+
+        //IMAGE: la foto de perfil requiere un archivo "foto_perfil" dentro de re/drawable
         Image(
             painter = painterResource(id = R.drawable.foto_perfil),
             contentDescription = "Foto de perfil de usuario",
@@ -71,23 +78,30 @@ fun TarjetaPresentacion() {
                 .clip(CircleShape),
             contentScale = ContentScale.Crop
         )
+        //Hueco vacío entre la imagen y el texto
         Spacer(modifier = Modifier.height(24.dp))
 
+        //TEXT: nombre
         Text(
             text = "David Fraile",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold
         )
 
+        //TEXT: rol o profesión
         Text(
             text = "Estudiante DAM",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.secondary
         )
+        //Hueco más grande antes del texto (32)
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
+                // ACTION_VIEW: le decimos a Android "quiero VER este recurso" y el sistema decide que app usar (normalmente el navegador)
+                // Uri.parse convierte el texto de la URL en el formato que android entiende
+                // startActivity lanza esa acción
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/davidfg02"))
                 context.startActivity(intent)
             },
