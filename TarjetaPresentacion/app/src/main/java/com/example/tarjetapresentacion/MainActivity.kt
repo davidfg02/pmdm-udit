@@ -172,6 +172,14 @@ fun TarjetaPresentacion() {
             ) {
                 Text(text = "Descargar CV")
             }
+
+            Image(
+                painter = painterResource(id = R.drawable.qr_cv),
+                contentDescription = "QR de descarga del CV",
+                modifier = Modifier
+                    .size(220.dp),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
