@@ -32,7 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,15 +70,20 @@ fun TarjetaPresentacion() {
 
     // Selector de archivos del sistema: el usuario elige dónde guardar el CV.
     // Funciona en cualquier versión de Android y no necesita permisos.
-    val guardarCv = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/pdf")
+    val guardarCv = rememberLauncherForActivityResult( // Launcher encargado de abrir el selector de archivos para guardar el CV como PDF.
+        ActivityResultContracts.CreateDocument("application/pdf")// Indica que se va a crear un nuevo documento con formato PDF.
     ) { uri: Uri? ->
+        // Comprueba que el usuario haya seleccionado una ubicación para guardar el archivo.
         if (uri != null) {
+            // Abre un flujo de salida para escribir el contenido del CV en el archivo seleccionado.
             context.contentResolver.openOutputStream(uri)?.use { output ->
+                // Abre el archivo PDF del CV almacenado en la carpeta res/raw.
                 context.resources.openRawResource(R.raw.cv_david).use { input ->
+                    // Copia el contenido del CV desde el archivo original al archivo seleccionado.
                     input.copyTo(output)
                 }
             }
+            // Muestra un mensaje indicando que el CV se ha guardado correctamente.
             Toast.makeText(context, "CV guardado", Toast.LENGTH_SHORT).show()
         }
     }
@@ -138,7 +147,14 @@ fun TarjetaPresentacion() {
                     contentColor = Color.White // Texto del boton
                 )
             ) {
-                Text(text = "Mi perfil de GitHub")
+                Text(
+                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                        append("Mi perfil de ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("GitHub")
+                        }
+                    }
+                )
             }
 
             Button(
@@ -156,21 +172,34 @@ fun TarjetaPresentacion() {
                     contentColor = Color.White // color del texto
                 )
             ) {
-                Text(text = "Mi perfil de LinkedIn")
+                Text(
+                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                        append("Mi perfil de ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("LinkedIn")
+                        }
+                    }
+                )
             }
-
             Button(
                 onClick = {
                     // Abre el selector del sistema para guardar el CV
                     guardarCv.launch("cv_david.pdf")
                 },
                 modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Red,
-                    contentColor = Color.White
+                colors = ButtonDefaults.buttonColors( // Define los colores personalizados que tendrá el botón.
+                    containerColor = Color.Red, //fondo del botón
+                    contentColor = Color.White // color del texto
                 )
             ) {
-                Text(text = "Descargar CV")
+                Text(
+                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                        append("Descargar ") // Añade la palabra "Descargar" con formato normal.
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {// Aplica negrita únicamente a la palabra "CV".
+                            append("CV")
+                        }
+                    }
+                )
             }
 
             Image(
@@ -180,6 +209,9 @@ fun TarjetaPresentacion() {
                     .size(220.dp),
                 contentScale = ContentScale.Crop
             )
+                Text(text=" QR de descarga",
+                    fontFamily = FontFamily.SansSerif,
+                    fontSize = 18.sp)
         }
     }
 }
