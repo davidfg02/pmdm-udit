@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -64,157 +66,171 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TarjetaPresentacion() {
-    // LocalContext: así un Composable "pide prestado" el contexto de Android.
-    // Lo necesitamos para abrir el navegador y guardar el archivo.
-    val context = LocalContext.current
 
-    // Selector de archivos del sistema: el usuario elige dónde guardar el CV.
-    // Funciona en cualquier versión de Android y no necesita permisos.
-    val guardarCv = rememberLauncherForActivityResult( // Launcher encargado de abrir el selector de archivos para guardar el CV como PDF.
-        ActivityResultContracts.CreateDocument("application/pdf")// Indica que se va a crear un nuevo documento con formato PDF.
-    ) { uri: Uri? ->
-        // Comprueba que el usuario haya seleccionado una ubicación para guardar el archivo.
-        if (uri != null) {
-            // Abre un flujo de salida para escribir el contenido del CV en el archivo seleccionado.
-            context.contentResolver.openOutputStream(uri)?.use { output ->
-                // Abre el archivo PDF del CV almacenado en la carpeta res/raw.
-                context.resources.openRawResource(R.raw.cv_david).use { input ->
-                    // Copia el contenido del CV desde el archivo original al archivo seleccionado.
-                    input.copyTo(output)
-                }
-            }
-            // Muestra un mensaje indicando que el CV se ha guardado correctamente.
-            Toast.makeText(context, "CV guardado", Toast.LENGTH_SHORT).show()
-        }
-    }
+    val scrollState = rememberScrollState()
 
-    // COLUMN: apila los elementos de arriba a abajo (como un flexbox vertical)
     Column(
         modifier = Modifier
-            .fillMaxSize() // ocupa toda la pantalla
-            .padding(16.dp), // margen para que nada toque los bordes
-        horizontalAlignment = Alignment.CenterHorizontally, // centra en el eje X
-        verticalArrangement = Arrangement.Center // centra en el eje Y
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp)
     ) {
+        // LocalContext: así un Composable "pide prestado" el contexto de Android.
+        // Lo necesitamos para abrir el navegador y guardar el archivo.
+        val context = LocalContext.current
 
-        // IMAGE: la foto de perfil requiere un archivo "foto_perfil" dentro de res/drawable
-        Image(
-            painter = painterResource(id = R.drawable.foto_perfil),
-            contentDescription = "Foto de perfil de usuario",
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
+        // Selector de archivos del sistema: el usuario elige dónde guardar el CV.
+        // Funciona en cualquier versión de Android y no necesita permisos.
+        val guardarCv = rememberLauncherForActivityResult( // Launcher encargado de abrir el selector de archivos para guardar el CV como PDF.
+            ActivityResultContracts.CreateDocument("application/pdf")// Indica que se va a crear un nuevo documento con formato PDF.
+        ) { uri: Uri? ->
+            // Comprueba que el usuario haya seleccionado una ubicación para guardar el archivo.
+            if (uri != null) {
+                // Abre un flujo de salida para escribir el contenido del CV en el archivo seleccionado.
+                context.contentResolver.openOutputStream(uri)?.use { output ->
+                    // Abre el archivo PDF del CV almacenado en la carpeta res/raw.
+                    context.resources.openRawResource(R.raw.cv_david).use { input ->
+                        // Copia el contenido del CV desde el archivo original al archivo seleccionado.
+                        input.copyTo(output)
+                    }
+                }
+                // Muestra un mensaje indicando que el CV se ha guardado correctamente.
+                Toast.makeText(context, "CV guardado", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        // Hueco vacío entre la imagen y el texto
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // TEXT: nombre
-        Text(
-            text = "David Fraile",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        // TEXT: rol o profesión
-        Text(
-            text = "Estudiante DAM",
-            fontSize = 18.sp,
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        // Hueco más grande antes de los botones
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Column solo para los botones, con 12 dp de separación entre ellos
+        // COLUMN: apila los elementos de arriba a abajo (como un flexbox vertical)
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize() // ocupa toda la pantalla
+                .padding(16.dp), // margen para que nada toque los bordes
+            horizontalAlignment = Alignment.CenterHorizontally, // centra en el eje X
+            verticalArrangement = Arrangement.Center // centra en el eje Y
         ) {
-            Button(
-                onClick = {
-                    // ACTION_VIEW: le decimos a Android "quiero VER este recurso" y el sistema decide que app usar (normalmente el navegador)
-                    // Uri.parse convierte el texto de la URL en el formato que android entiende
-                    // startActivity lanza esa acción
-                    val intent =
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/davidfg02"))
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF552352), // Fondo del botón
-                    contentColor = Color.White // Texto del boton
-                )
-            ) {
-                Text(
-                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
-                        append("Mi perfil de ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("GitHub")
-                        }
-                    }
-                )
-            }
 
-            Button(
-                onClick = {
-                    val intent =
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://www.linkedin.com/in/david-fraile-dfg02")
-                        )
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0A66C2), // fondo del botón
-                    contentColor = Color.White // color del texto
-                )
-            ) {
-                Text(
-                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
-                        append("Mi perfil de ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("LinkedIn")
-                        }
-                    }
-                )
-            }
-            Button(
-                onClick = {
-                    // Abre el selector del sistema para guardar el CV
-                    guardarCv.launch("cv_david.pdf")
-                },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.buttonColors( // Define los colores personalizados que tendrá el botón.
-                    containerColor = Color.Red, //fondo del botón
-                    contentColor = Color.White // color del texto
-                )
-            ) {
-                Text(
-                    text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
-                        append("Descargar ") // Añade la palabra "Descargar" con formato normal.
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {// Aplica negrita únicamente a la palabra "CV".
-                            append("CV")
-                        }
-                    }
-                )
-            }
-
+            // IMAGE: la foto de perfil requiere un archivo "foto_perfil" dentro de res/drawable
             Image(
-                painter = painterResource(id = R.drawable.qr_cv),
-                contentDescription = "QR de descarga del CV",
+                painter = painterResource(id = R.drawable.foto_perfil),
+                contentDescription = "Foto de perfil de usuario",
                 modifier = Modifier
-                    .size(220.dp),
+                    .size(150.dp)
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
-                Text(text=" QR de descarga",
+
+            // Hueco vacío entre la imagen y el texto
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // TEXT: nombre
+            Text(
+                text = "David Fraile",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            // TEXT: rol o profesión
+            Text(
+                text = "Estudiante DAM",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.secondary
+            )
+
+            // Hueco más grande antes de los botones
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Column solo para los botones, con 12 dp de separación entre ellos
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = {
+                        // ACTION_VIEW: le decimos a Android "quiero VER este recurso" y el sistema decide que app usar (normalmente el navegador)
+                        // Uri.parse convierte el texto de la URL en el formato que android entiende
+                        // startActivity lanza esa acción
+                        val intent =
+                            Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/davidfg02"))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF552352), // Fondo del botón
+                        contentColor = Color.White // Texto del boton
+                    )
+                ) {
+                    Text(
+                        text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                            append("Mi perfil de ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("GitHub")
+                            }
+                        }
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val intent =
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://www.linkedin.com/in/david-fraile-dfg02")
+                            )
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0A66C2), // fondo del botón
+                        contentColor = Color.White // color del texto
+                    )
+                ) {
+                    Text(
+                        text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                            append("Mi perfil de ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("LinkedIn")
+                            }
+                        }
+                    )
+                }
+                Button(
+                    onClick = {
+                        // Abre el selector del sistema para guardar el CV
+                        guardarCv.launch("cv_david.pdf")
+                    },
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    colors = ButtonDefaults.buttonColors( // Define los colores personalizados que tendrá el botón.
+                        containerColor = Color.Red, //fondo del botón
+                        contentColor = Color.White // color del texto
+                    )
+                ) {
+                    Text(
+                        text = buildAnnotatedString { // Crea un texto que permite aplicar diferentes estilos a partes del mismo.
+                            append("Descargar ") // Añade la palabra "Descargar" con formato normal.
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {// Aplica negrita únicamente a la palabra "CV".
+                                append("CV")
+                            }
+                        }
+                    )
+                }
+
+                Image(
+                    painter = painterResource(id = R.drawable.qr_cv),
+                    contentDescription = "QR de descarga del CV",
+                    modifier = Modifier
+                        .size(210.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Text(
+                    text=" QR de descarga",
                     fontFamily = FontFamily.SansSerif,
-                    fontSize = 18.sp)
+                    fontSize = 18.sp
+                )
+
+            }
         }
     }
-}
+    }
+
 
 @Preview(showBackground = true)
 @Composable
