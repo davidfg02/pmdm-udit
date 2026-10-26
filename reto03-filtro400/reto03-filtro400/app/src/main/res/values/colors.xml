@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta de marca: índice/violeta con acentos menta. -->
+    <color name="filtro_primario">#FF4F46E5</color>
+    <color name="filtro_violeta">#FF9333EA</color>
+    <color name="filtro_fondo">#FFF6F7FC</color>
+    <color name="filtro_fondo_oscuro">#FF0C0E1A</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
